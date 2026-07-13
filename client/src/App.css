@@ -1,0 +1,151 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  color: #1a1a1a;
+}
+
+.logos-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  row-gap: 12px;
+  margin-bottom: 28px;
+}
+
+.logos-header img {
+  height: 32px;
+  width: auto;
+}
+
+.page h1 {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.page .subtitle {
+  color: #555;
+  margin-bottom: 28px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background: #fff;
+}
+
+.day-group {
+  margin-bottom: 20px;
+}
+
+.day-group h3 {
+  text-transform: capitalize;
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.slot-btn {
+  border: 1px solid #003876;
+  color: #003876;
+  background: #fff;
+  padding: 10px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.slot-btn:hover {
+  background: #eaf1fb;
+}
+
+.slot-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #003876;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.btn-primary:hover {
+  background: #002a5c;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status-banner {
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.status-banner.info { background: #eaf1fb; color: #003876; }
+.status-banner.success { background: #e6f6ec; color: #14532d; }
+.status-banner.error { background: #fdecec; color: #7a1212; }
+
+.field {
+  margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.field textarea,
+.field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid #eee;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #eee;
+}
+
+.tag.pendiente { background: #eee; color: #555; }
+.tag.invitado { background: #fff4dc; color: #8a5a00; }
+.tag.agendado { background: #eaf1fb; color: #003876; }
+.tag.confirmado { background: #e6f6ec; color: #14532d; }
+.tag.cancelado { background: #fdecec; color: #7a1212; }
