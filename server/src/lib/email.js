@@ -217,9 +217,8 @@ export function sendZoomConfirmationEmail({ name, email, date, startTime, endTim
 }
 
 function formatDate(isoDate) {
-  const [y, m, d] = isoDate.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString('es-VE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const [y, m, d] = isoDate.split('-');
+  return `${d}/${m}/${y}`;
 }
 
 function escapeHtml(str) {

@@ -25,6 +25,12 @@ function parseSlotsInput(text) {
     })
 }
 
+function formatDate(isoDate) {
+  if (!isoDate) return isoDate
+  const [y, m, d] = isoDate.split('-')
+  return `${d}/${m}/${y}`
+}
+
 export default function AdminPage() {
   const [adminKey, setAdminKey] = useState(localStorage.getItem('adminKey') || '')
   const [candidates, setCandidates] = useState([])
@@ -205,7 +211,7 @@ export default function AdminPage() {
                 <td>{c.name}</td>
                 <td>{c.email}</td>
                 <td><span className={`tag ${c.status}`}>{c.status}</span></td>
-                <td>{c.date ? `${c.date} ${c.start_time}-${c.end_time}` : '—'}</td>
+                <td>{c.date ? `${formatDate(c.date)} ${c.start_time}-${c.end_time}` : '—'}</td>
                 <td>
                   <button onClick={() => handleDeleteCandidate(c.id, c.name)} style={{ color: '#7a1212', background: 'none', border: 'none', cursor: 'pointer' }}>
                     Eliminar
@@ -231,7 +237,7 @@ export default function AdminPage() {
           <tbody>
             {slots.map((s) => (
               <tr key={s.id}>
-                <td>{s.date}</td>
+                <td>{formatDate(s.date)}</td>
                 <td>{s.start_time}-{s.end_time}</td>
                 <td>{s.is_available ? 'Sí' : 'No'}</td>
                 <td>{s.candidate_name || '—'}</td>
