@@ -27,13 +27,18 @@ npm run dev
 Variables en `server/.env`:
 - `ADMIN_KEY`: clave que usa el panel de admin (cámbiala).
 - `APP_BASE_URL`: URL pública del frontend, usada para armar el enlace de agendamiento (en local: `http://localhost:5173`).
-- Envío de correos (deja ambas opciones vacías para simular el envío en la consola del servidor):
-  - **Gmail SMTP** (`GMAIL_USER` + `GMAIL_APP_PASSWORD`): recomendado si no tienes un dominio propio para verificar en Resend. Pasos:
+- Envío de correos (deja todas las opciones vacías para simular el envío en la consola del servidor). Orden de prioridad si hay varias configuradas: **SendGrid → Gmail → Resend**.
+  - **SendGrid** (`SENDGRID_API_KEY` + `FROM_EMAIL`) — **la única que funciona en Render** (envía por HTTPS; Render bloquea SMTP saliente). Pasos:
+    1. Crea una cuenta gratis en [sendgrid.com](https://signup.sendgrid.com/) (100 correos/día gratis).
+    2. Ve a Settings → Sender Authentication → [Single Sender Verification](https://app.sendgrid.com/settings/sender_auth/senders) y verifica la cuenta que va a enviar (ej. `ciep.invedin@gmail.com`) — te llega un correo con un enlace de confirmación, no requiere DNS.
+    3. Crea una API Key en Settings → API Keys (permisos "Full Access" o al menos "Mail Send").
+    4. Pon `SENDGRID_API_KEY=` la key y `FROM_EMAIL=` el correo que verificaste.
+  - **Gmail SMTP** (`GMAIL_USER` + `GMAIL_APP_PASSWORD`) — funciona en local, **no funciona en Render** (bloquea los puertos SMTP 465/587). Útil solo para probar en tu máquina. Pasos:
     1. Entra a la cuenta de Gmail que va a enviar los correos (ej. `ciep.invedin@gmail.com`).
     2. Activa la verificación en 2 pasos en [myaccount.google.com/security](https://myaccount.google.com/security) (obligatorio para poder generar contraseñas de aplicación).
     3. Ve a [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), crea una con un nombre como "UCAB Entrevistas" y copia el código de 16 caracteres que te da Google.
     4. Pon `GMAIL_USER=esa-cuenta@gmail.com` y `GMAIL_APP_PASSWORD=` el código (no es tu contraseña normal de Gmail).
-  - **Resend** (`RESEND_API_KEY` + `FROM_EMAIL`): requiere verificar un dominio propio en [resend.com/domains](https://resend.com/domains) (no funciona con `@gmail.com` ni otros dominios que no controles). Si ambas opciones (Gmail y Resend) están configuradas, se usa Gmail primero.
+  - **Resend** (`RESEND_API_KEY` + `FROM_EMAIL`): requiere verificar un dominio propio en [resend.com/domains](https://resend.com/domains) (no funciona con `@gmail.com` ni otros dominios que no controles).
 
 ### 2. Frontend
 

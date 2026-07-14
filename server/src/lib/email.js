@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -7,12 +8,16 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const logosDir = path.join(__dirname, '..', '..', 'assets', 'logos');
 
+const sendgridApiKey = process.env.SENDGRID_API_KEY;
 const resendApiKey = process.env.RESEND_API_KEY;
 const gmailUser = process.env.GMAIL_USER;
 const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
 const fromEmail = process.env.FROM_EMAIL || gmailUser || 'entrevistas@ucab.edu.ve';
 const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:5173';
 
+// SendGrid envía por HTTPS (funciona en hostings como Render, que bloquean SMTP saliente).
+// Gmail SMTP solo funciona en redes que no bloqueen los puertos 465/587 (ej. en local).
+if (sendgridApiKey) sgMail.setApiKey(sendgridApiKey);
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 const gmailTransport = (gmailUser && gmailAppPassword)
   ? nodemailer.createTransport({
@@ -65,16 +70,38 @@ function logosAttachments() {
   }));
 }
 
-async function send({ to, subject, html }) {
-  const attachments = logosAttachments();
+const MIME_TYPES = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg' };
+let cachedSendgridAttachments = null;
+function logosAttachmentsBase64() {
+  if (cachedSendgridAttachments) return cachedSendgridAttachments;
+  cachedSendgridAttachments = availableLogos().map((logo) => ({
+    content: fs.readFileSync(path.join(logosDir, logo.file)).toString('base64'),
+    filename: logo.file,
+    type: MIME_TYPES[path.extname(logo.file)] || 'application/octet-stream',
+    disposition: 'inline',
+    content_id: logo.cid,
+  }));
+  return cachedSendgridAttachments;
+}
 
+async function send({ to, subject, html }) {
+  // Prioridad: SendGrid (HTTPS, funciona en Render) > Gmail SMTP (solo en redes sin bloqueo) > Resend > simulado.
+  if (sendgridApiKey) {
+    return sgMail.send({
+      to,
+      from: { email: fromEmail, name: 'UCAB — Formación en Terapia de Familia' },
+      subject,
+      html,
+      attachments: logosAttachmentsBase64(),
+    });
+  }
   if (gmailTransport) {
     return gmailTransport.sendMail({
       from: `"UCAB — Formación en Terapia de Familia" <${gmailUser}>`,
       to,
       subject,
       html,
-      attachments,
+      attachments: logosAttachments(),
     });
   }
   if (resend) {
@@ -83,14 +110,14 @@ async function send({ to, subject, html }) {
       to,
       subject,
       html,
-      attachments: attachments.map((a) => ({
+      attachments: logosAttachments().map((a) => ({
         filename: a.filename,
         path: a.path,
         content_id: a.cid,
       })),
     });
   }
-  console.log('\n[EMAIL SIMULADO] (configura GMAIL_USER/GMAIL_APP_PASSWORD o RESEND_API_KEY en server/.env para enviar de verdad)');
+  console.log('\n[EMAIL SIMULADO] (configura SENDGRID_API_KEY, GMAIL_USER/GMAIL_APP_PASSWORD o RESEND_API_KEY en server/.env para enviar de verdad)');
   console.log('Para:', to);
   console.log('Asunto:', subject);
   console.log(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
