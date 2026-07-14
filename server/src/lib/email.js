@@ -19,6 +19,17 @@ const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:5173';
 // Gmail SMTP solo funciona en redes que no bloqueen los puertos 465/587 (ej. en local).
 if (sendgridApiKey) sgMail.setApiKey(sendgridApiKey);
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
+export function getEmailConfig() {
+  return {
+    provider: sendgridApiKey ? 'sendgrid' : gmailTransportConfigured() ? 'gmail' : resendApiKey ? 'resend' : 'simulado',
+    fromEmail,
+    sendgridApiKeySet: Boolean(sendgridApiKey),
+  };
+}
+function gmailTransportConfigured() {
+  return Boolean(gmailUser && gmailAppPassword);
+}
+
 const gmailTransport = (gmailUser && gmailAppPassword)
   ? nodemailer.createTransport({
       service: 'gmail',

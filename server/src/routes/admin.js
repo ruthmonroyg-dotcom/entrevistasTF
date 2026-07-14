@@ -2,10 +2,15 @@ import { Router } from 'express';
 import { nanoid } from 'nanoid';
 import { db } from '../db.js';
 import { requireAdmin } from '../lib/adminAuth.js';
-import { sendInvitationEmail } from '../lib/email.js';
+import { sendInvitationEmail, getEmailConfig } from '../lib/email.js';
 
 export const adminRouter = Router();
 adminRouter.use(requireAdmin);
+
+// Diagnóstico temporal: qué proveedor de correo y FROM_EMAIL está usando el servidor.
+adminRouter.get('/email-config', (req, res) => {
+  res.json(getEmailConfig());
+});
 
 // --- Candidatos ---
 
