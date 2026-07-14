@@ -1,6 +1,8 @@
 import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
+import MailComposer from 'nodemailer/lib/mail-composer/index.js';
 import sgMail from '@sendgrid/mail';
+import { google } from 'googleapis';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -8,6 +10,9 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const logosDir = path.join(__dirname, '..', '..', 'assets', 'logos');
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const googleRefreshToken = process.env.GOOGLE_REFRESH_TOKEN;
 const sendgridApiKey = process.env.SENDGRID_API_KEY;
 const resendApiKey = process.env.RESEND_API_KEY;
 const gmailUser = process.env.GMAIL_USER;
@@ -15,27 +20,34 @@ const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
 const fromEmail = process.env.FROM_EMAIL || gmailUser || 'entrevistas@ucab.edu.ve';
 const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:5173';
 
-// SendGrid envía por HTTPS (funciona en hostings como Render, que bloquean SMTP saliente).
-// Gmail SMTP solo funciona en redes que no bloqueen los puertos 465/587 (ej. en local).
-if (sendgridApiKey) sgMail.setApiKey(sendgridApiKey);
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
-export function getEmailConfig() {
-  return {
-    provider: sendgridApiKey ? 'sendgrid' : gmailTransportConfigured() ? 'gmail' : resendApiKey ? 'resend' : 'simulado',
-    fromEmail,
-    sendgridApiKeySet: Boolean(sendgridApiKey),
-  };
-}
-function gmailTransportConfigured() {
-  return Boolean(gmailUser && gmailAppPassword);
+// Gmail API: envía por HTTPS (funciona en Render) y sale genuinamente autenticado
+// por Google, así que no cae en spam como pasa con SendGrid/Resend enviando "desde"
+// una dirección @gmail.com sin dominio propio verificado.
+const gmailApiConfigured = Boolean(googleClientId && googleClientSecret && googleRefreshToken && gmailUser);
+let gmailApiClient = null;
+if (gmailApiConfigured) {
+  const oauth2Client = new google.auth.OAuth2(googleClientId, googleClientSecret);
+  oauth2Client.setCredentials({ refresh_token: googleRefreshToken });
+  gmailApiClient = google.gmail({ version: 'v1', auth: oauth2Client });
 }
 
+if (sendgridApiKey) sgMail.setApiKey(sendgridApiKey);
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 const gmailTransport = (gmailUser && gmailAppPassword)
   ? nodemailer.createTransport({
       service: 'gmail',
       auth: { user: gmailUser, pass: gmailAppPassword },
     })
   : null;
+
+export function getEmailConfig() {
+  const provider = gmailApiConfigured ? 'gmail-api'
+    : sendgridApiKey ? 'sendgrid'
+    : gmailTransport ? 'gmail-smtp'
+    : resendApiKey ? 'resend'
+    : 'simulado';
+  return { provider, fromEmail, gmailApiConfigured, sendgridApiKeySet: Boolean(sendgridApiKey) };
+}
 
 // Logos alineados en la parte superior de cada correo: IATF, UCAB, INVEDIN,
 // 2cm de separación entre cada uno, centrados al ancho del contenido.
@@ -95,8 +107,25 @@ function logosAttachmentsBase64() {
   return cachedSendgridAttachments;
 }
 
+async function sendViaGmailApi({ to, subject, html }) {
+  const mail = new MailComposer({
+    from: `"UCAB — Formación en Terapia de Familia" <${gmailUser}>`,
+    to,
+    subject,
+    html,
+    attachments: logosAttachments(),
+  });
+  const message = await mail.compile().build();
+  const raw = message.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return gmailApiClient.users.messages.send({ userId: 'me', requestBody: { raw } });
+}
+
 async function send({ to, subject, html }) {
-  // Prioridad: SendGrid (HTTPS, funciona en Render) > Gmail SMTP (solo en redes sin bloqueo) > Resend > simulado.
+  // Prioridad: Gmail API (HTTPS, funciona en Render, no cae en spam) > SendGrid (HTTPS, cae en spam sin dominio propio)
+  // > Gmail SMTP (solo en redes sin bloqueo) > Resend > simulado.
+  if (gmailApiConfigured) {
+    return sendViaGmailApi({ to, subject, html });
+  }
   if (sendgridApiKey) {
     try {
       return await sgMail.send({

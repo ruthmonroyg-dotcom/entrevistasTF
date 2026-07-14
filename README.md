@@ -27,8 +27,17 @@ npm run dev
 Variables en `server/.env`:
 - `ADMIN_KEY`: clave que usa el panel de admin (cámbiala).
 - `APP_BASE_URL`: URL pública del frontend, usada para armar el enlace de agendamiento (en local: `http://localhost:5173`).
-- Envío de correos (deja todas las opciones vacías para simular el envío en la consola del servidor). Orden de prioridad si hay varias configuradas: **SendGrid → Gmail → Resend**.
-  - **SendGrid** (`SENDGRID_API_KEY` + `FROM_EMAIL`) — **la única que funciona en Render** (envía por HTTPS; Render bloquea SMTP saliente). Pasos:
+- Envío de correos (deja todas las opciones vacías para simular el envío en la consola del servidor). Orden de prioridad si hay varias configuradas: **Gmail API → SendGrid → Gmail SMTP → Resend**.
+  - **Gmail API** (`GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` + `GOOGLE_REFRESH_TOKEN` + `GMAIL_USER`) — **recomendada**: envía por HTTPS (funciona en Render) y sale autenticado de verdad por Google, así que no cae en spam como pasa enviando "desde" una dirección `@gmail.com` a través de SendGrid/Resend sin dominio propio verificado. Pasos:
+    1. Ve a [console.cloud.google.com](https://console.cloud.google.com/) y crea un proyecto nuevo (ej. "UCAB Entrevistas").
+    2. En el buscador de arriba, busca "Gmail API" → Enable.
+    3. Ve a "APIs & Services" → "OAuth consent screen": User Type "External", nombre de la app, tu correo como soporte. En "Scopes" agrega `https://www.googleapis.com/auth/gmail.send`. En "Test users" agrega la cuenta que va a enviar (ej. `ciep.invedin@gmail.com`). Deja la app en modo "Testing" (no hace falta publicarla ni pedir verificación de Google).
+    4. Ve a "APIs & Services" → "Credentials" → "Create Credentials" → "OAuth client ID" → tipo "Desktop app". Te da un **Client ID** y un **Client Secret**.
+    5. Ve a [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/): clic en el ícono de engranaje (arriba a la derecha) → marca "Use your own OAuth credentials" → pega tu Client ID y Client Secret.
+    6. En el panel izquierdo (Step 1), en el campo de texto pega el scope `https://www.googleapis.com/auth/gmail.send` → "Authorize APIs". Inicia sesión con la cuenta que va a enviar los correos. Google va a advertir que la app no está verificada — clic en "Advanced" → "Go to [nombre de tu app] (unsafe)" (es normal y seguro, es tu propia app).
+    7. En el panel izquierdo (Step 2), clic en "Exchange authorization code for tokens". Copia el **Refresh token** que aparece.
+    8. Pon en `.env`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN` (el que acabas de copiar) y `GMAIL_USER=` la cuenta que autorizaste.
+  - **SendGrid** (`SENDGRID_API_KEY` + `FROM_EMAIL`) — funciona en Render (HTTPS), pero si el remitente es `@gmail.com` sin dominio propio autenticado, es común que caiga en spam. Pasos:
     1. Crea una cuenta gratis en [sendgrid.com](https://signup.sendgrid.com/) (100 correos/día gratis).
     2. Ve a Settings → Sender Authentication → [Single Sender Verification](https://app.sendgrid.com/settings/sender_auth/senders) y verifica la cuenta que va a enviar (ej. `ciep.invedin@gmail.com`) — te llega un correo con un enlace de confirmación, no requiere DNS.
     3. Crea una API Key en Settings → API Keys (permisos "Full Access" o al menos "Mail Send").
