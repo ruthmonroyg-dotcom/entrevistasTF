@@ -87,13 +87,18 @@ function logosAttachmentsBase64() {
 async function send({ to, subject, html }) {
   // Prioridad: SendGrid (HTTPS, funciona en Render) > Gmail SMTP (solo en redes sin bloqueo) > Resend > simulado.
   if (sendgridApiKey) {
-    return sgMail.send({
-      to,
-      from: { email: fromEmail, name: 'UCAB — Formación en Terapia de Familia' },
-      subject,
-      html,
-      attachments: logosAttachmentsBase64(),
-    });
+    try {
+      return await sgMail.send({
+        to,
+        from: { email: fromEmail, name: 'UCAB — Formación en Terapia de Familia' },
+        subject,
+        html,
+        attachments: logosAttachmentsBase64(),
+      });
+    } catch (err) {
+      const detail = err.response?.body?.errors?.map((e) => e.message).join('; ');
+      throw new Error(detail ? `SendGrid: ${detail}` : err.message);
+    }
   }
   if (gmailTransport) {
     return gmailTransport.sendMail({
