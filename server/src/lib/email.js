@@ -188,7 +188,7 @@ export function sendInvitationEmail({ name, email, token }) {
         <a href="${link}">${link}</a>
       </p>
       <p>Este enlace es personal e intransferible.</p>
-      <p>Saludos,<br/>Equipo de Formación — UCAB</p>
+      <p>Saludos,<br/>Equipo de Admisión CIEPI / INVEDIN</p>
     </div>
   `;
   return send({ to: email, subject, html });
@@ -210,7 +210,7 @@ export function sendZoomConfirmationEmail({ name, email, date, startTime, endTim
         ${zoomPassword ? `<li><strong>Contraseña:</strong> ${escapeHtml(zoomPassword)}</li>` : ''}
       </ul>
       <p>Por favor conéctate 5 minutos antes de la hora indicada.</p>
-      <p>Saludos,<br/>Equipo de Formación — UCAB</p>
+      <p>Saludos,<br/>Equipo de Admisión CIEPI / INVEDIN</p>
     </div>
   `;
   return send({ to: email, subject, html });
