@@ -172,11 +172,11 @@ async function send({ to, subject, html }) {
 
 export function sendInvitationEmail({ name, email, token }) {
   const link = `${appBaseUrl}/agendar/${token}`;
-  const subject = 'UCAB — Agenda tu entrevista para la Formación en Terapia de Familia';
+  const subject = 'Agenda tu entrevista para la Formación en Terapia de Familia UCAB - IATF - INVEDIN';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #222;">
       ${logosHeaderHtml()}
-      <h2>Formación en Terapia de Familia — UCAB</h2>
+      <h2>Formación en Terapia de Familia — UCAB - IATF - INVEDIN</h2>
       <p>Hola ${escapeHtml(name)},</p>
       <p>Como parte del proceso de selección para la Formación en Terapia de Familia, te invitamos a agendar tu entrevista virtual (30 minutos, por Zoom).</p>
       <p>
