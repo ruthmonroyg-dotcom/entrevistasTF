@@ -4,10 +4,14 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(__dirname, '..', 'data');
+// DATA_DIR permite apuntar explícitamente al punto de montaje del disco persistente
+// (ej. en Render: DATA_DIR=/data), en vez de asumir una ruta relativa al checkout del
+// repo que puede no coincidir con el "Mount Path" configurado en el panel de Render.
+const dataDir = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
 const dbPath = path.join(dataDir, 'entrevistas.db');
 
 fs.mkdirSync(dataDir, { recursive: true });
+console.log(`[db] Usando base de datos en: ${dbPath}`);
 
 export const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
