@@ -109,7 +109,7 @@ function logosAttachmentsBase64() {
 
 async function sendViaGmailApi({ to, subject, html }) {
   const mail = new MailComposer({
-    from: `"UCAB — Formación en Terapia de Familia" <${gmailUser}>`,
+    from: `"Formación en Terapia de Familia" <${gmailUser}>`,
     to,
     subject,
     html,
@@ -130,7 +130,7 @@ async function send({ to, subject, html }) {
     try {
       return await sgMail.send({
         to,
-        from: { email: fromEmail, name: 'UCAB — Formación en Terapia de Familia' },
+        from: { email: fromEmail, name: 'Formación en Terapia de Familia' },
         subject,
         html,
         attachments: logosAttachmentsBase64(),
@@ -142,7 +142,7 @@ async function send({ to, subject, html }) {
   }
   if (gmailTransport) {
     return gmailTransport.sendMail({
-      from: `"UCAB — Formación en Terapia de Familia" <${gmailUser}>`,
+      from: `"Formación en Terapia de Familia" <${gmailUser}>`,
       to,
       subject,
       html,
