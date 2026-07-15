@@ -26,6 +26,6 @@ app.get(/^(?!\/api).*/, (req, res) => {
 });
 
 const port = process.env.PORT || 4000;
-app.listen(port, () => {
-  console.log(`Servidor de entrevistas escuchando en http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Servidor de entrevistas escuchando en el puerto ${port}`);
 });
