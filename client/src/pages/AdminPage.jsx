@@ -137,6 +137,10 @@ export default function AdminPage() {
     }
   }
 
+  const confirmedCandidates = candidates
+    .filter((c) => c.status === 'confirmado' && c.date)
+    .sort((a, b) => (a.date + a.start_time).localeCompare(b.date + b.start_time))
+
   if (!adminKey) {
     return (
       <div className="page">
@@ -197,7 +201,38 @@ export default function AdminPage() {
         </button>
       </div>
 
-      <div className="card">
+      <div className="card no-print">
+        <h3>Horarios confirmados</h3>
+        <p>Genera una lista imprimible de los candidatos que ya confirmaron su asistencia, con día y hora.</p>
+        <button className="btn-primary" onClick={() => window.print()} disabled={confirmedCandidates.length === 0}>
+          Imprimir horarios confirmados
+        </button>
+        {confirmedCandidates.length === 0 && <p style={{ color: '#777', marginTop: 8 }}>Todavía no hay candidatos confirmados.</p>}
+      </div>
+
+      {/* Esta sección solo se ve al imprimir (ver .print-only en App.css) */}
+      <div className="print-only">
+        <h2>Horarios confirmados — Formación en Terapia de Familia</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th><th>Correo</th><th>Fecha</th><th>Hora</th>
+            </tr>
+          </thead>
+          <tbody>
+            {confirmedCandidates.map((c) => (
+              <tr key={c.id}>
+                <td>{c.name}</td>
+                <td>{c.email}</td>
+                <td>{formatDate(c.date)}</td>
+                <td>{c.start_time}-{c.end_time}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="card no-print">
         <h3>Candidatos</h3>
         <table>
           <thead>

@@ -149,3 +149,29 @@ th, td {
 .tag.agendado { background: #eaf1fb; color: #003876; }
 .tag.confirmado { background: #e6f6ec; color: #14532d; }
 .tag.cancelado { background: #fdecec; color: #7a1212; }
+
+/* Reporte imprimible de horarios confirmados: oculto en pantalla, visible solo al imprimir. */
+.print-only {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-only,
+  .print-only * {
+    visibility: visible;
+  }
+  .print-only {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 24px;
+  }
+  .print-only table {
+    width: 100%;
+  }
+}
