@@ -145,7 +145,7 @@ export default function AdminPage() {
     return (
       <div className="page">
         <LogosHeader />
-        <h1>Panel de administración — Entrevistas UCAB</h1>
+        <h1>Panel de administración — Entrevistas de Admisión a la Certificación de Terapia de Familia UCAB IATF INVEDIN</h1>
         {error && <div className="status-banner error">{error}</div>}
         <div className="card">
           <div className="field">
@@ -165,7 +165,7 @@ export default function AdminPage() {
   return (
     <div className="page" style={{ maxWidth: 960 }}>
       <LogosHeader />
-      <h1>Panel de administración — Entrevistas UCAB</h1>
+      <h1>Panel de administración — Entrevistas de Admisión a la Certificación de Terapia de Familia UCAB IATF INVEDIN</h1>
       <p className="subtitle">Formación en Terapia de Familia</p>
 
       {message && <div className="status-banner success">{message}</div>}
