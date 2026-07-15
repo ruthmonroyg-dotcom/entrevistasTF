@@ -111,5 +111,20 @@ export async function initSchema() {
   }
 }
 
-await initSchema();
-console.log(`[db] Conectado a MySQL: ${process.env.DB_HOST || 'localhost'}/${process.env.DB_NAME}`);
+// Estado de conexión a la base de datos, expuesto para que /api/health pueda
+// informar si algo falló, en vez de tumbar todo el proceso antes de que
+// Express siquiera llegue a levantar el servidor HTTP.
+export const dbStatus = { connected: false, error: null };
+
+export async function connectDb() {
+  try {
+    await initSchema();
+    dbStatus.connected = true;
+    dbStatus.error = null;
+    console.log(`[db] Conectado a MySQL: ${process.env.DB_HOST || 'localhost'}/${process.env.DB_NAME}`);
+  } catch (err) {
+    dbStatus.connected = false;
+    dbStatus.error = `${err.code || ''} ${err.message}`.trim();
+    console.error('[db] No se pudo conectar/inicializar la base de datos:', err);
+  }
+}
